@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>XO ضد الذكاء الاصطناعي</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .cell {
+      background-color: #50022;
+      border: 2px solid #555;
+      font-size: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      height: 100px;
+      width: 100px;
+    }
+    .cell:hover {
+      background-color: #333;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 22px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>لعبة XO ضد الذكاء الاصطناعي</h1>
+  <div id="game"></div>
+  <div id="status">دورك أنت (X)</div>
+  <button onclick="resetGame()">إعادة اللعب</button>
+
+  <script>
+    const game = document.getElementById("game");
+    const status = document.getElementById("status");
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameOver = false;
+
+    function checkWinner() {
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+      for (let [a,b,c] of winPatterns) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          return board[a];
+        }
+      }
+      if (!board.includes("")) return "تعادل";
+      return null;
+    }
+
+    function makeMove(index, player) {
+      if (board[index] || gameOver) return;
+      board[index] = player;
+      renderBoard();
+      const result = checkWinner();
+      if (result) {
+        gameOver = true;
+        status.textContent = result === "تعادل" ? "انتهت بتعادل!" : `🎉 الفائز هو: ${result}`;
+        return;
+      }
+      if (player === "X") {
+        status.textContent = "دور الذكاء الاصطناعي (O)...";
+        setTimeout(aiMove, 500);
+      } else {
+        status.textContent = "دورك أنت (X)";
+      }
+    }
+
+    function aiMove() {
+      if (gameOver) return;
+      for (let i = 0; i < 9; i++) {
+        if (!board[i]) {
+          makeMove(i, "O");
+          break;
+        }
+      }
+    }
+
+    function renderBoard() {
+      game.innerHTML = "";
+      board.forEach((cell, i) => {
+        const div = document.createElement("div");
+        div.className = "cell";
+        div.textContent = cell;
+        if (!cell && !gameOver) {
+          div.onclick = () => makeMove(i, "X");
+        }
+        game.appendChild(div);
+      });
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      gameOver = false;
+      status.textContent = "دورك أنت (X)";
+      renderBoard();
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
